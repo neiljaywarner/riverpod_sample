@@ -47,26 +47,13 @@ class Album {
   }
 }
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ProviderScope(child: MyAsyncValueRiverpodApp()));
 
-class MyApp extends ConsumerStatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  ConsumerState<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends ConsumerState<MyApp> {
-  late Future<Album> futureAlbum;
+class MyAsyncValueRiverpodApp extends ConsumerWidget {
+  const MyAsyncValueRiverpodApp({Key? key}) : super(key: key);
 
   @override
-  void initState() {
-    super.initState();
-    futureAlbum = ref.read(fetchAlbumProvider.future);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Fetch Data Example',
       theme: ThemeData(
@@ -74,22 +61,13 @@ class _MyAppState extends ConsumerState<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Fetch Data Example'),
+          title: const Text('Riverpod AsyncValueFetch Data Example'),
         ),
         body: Center(
-          child: FutureBuilder<Album>(
-            future: futureAlbum,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Text(snapshot.data!.title);
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
-
-              // By default, show a loading spinner.
-              return const CircularProgressIndicator();
-            },
-          ),
+            child: ref.watch(fetchAlbumProvider)
+                .when(data: (data) => Text(data.title),
+                error: (e, __) => Text(e.toString()),
+                loading: () => const CircularProgressIndicator())
         ),
       ),
     );
