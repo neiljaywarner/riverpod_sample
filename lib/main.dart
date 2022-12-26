@@ -2,9 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-Future<Album> fetchAlbum() async {
+part 'main.g.dart';
+
+// Using riverpod_generator, we define Providers by annotating functions with @riverpod.
+// In this example, riverpod_generator will use this function and generate a matching "fetchProductProvider".
+// The following example would be the equivalent of a "FutureProvider.autoDispose.family"
+@riverpod
+Future<Album> fetchAlbum(FetchAlbumRef ref) async {
   final response = await http
       .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
 
@@ -41,20 +49,20 @@ class Album {
 
 void main() => runApp(const MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends ConsumerState<MyApp> {
   late Future<Album> futureAlbum;
 
   @override
   void initState() {
     super.initState();
-    futureAlbum = fetchAlbum();
+    futureAlbum = ref.read(fetchAlbumProvider.future);
   }
 
   @override
